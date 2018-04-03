@@ -54,6 +54,77 @@ Properties:
   - payload `String|Document|ArrayBuffer|Blob|undefined` - Response body
   - headers `String|undefined` - Response headers
 
+### Advanced response properties
+
+When using own transport libraries or server side transport you may have
+access to more information about the request and response like redirects
+and timings. The response status view can render additional UI for this
+data.
+
+To enable this feature, set `isXhr` to false and any of the following
+properties:
+
+- sentHttpMessage `String` - Raw HTTP message sent to server
+- redirects `Array<Object>` - A list of redirect information. Each object has the following properties:
+  - status (`Number`) - Response status code
+  - statusText (`String`) - Response status text. Can be empty string.
+  - headers (`String|undefined`) - Response headers
+  - payload (`String|Document|ArrayBuffer|Blob|undefined`) - Response body
+- redirectsTiming `Array<Object>` - List of HAR 1.2 timing objects for each redirected request. The order must corresponds with order in `redirects` array.
+- timing `Object` - HAR 1.2 timings object
+
+#### Example
+
+```javascript
+const e = new CustomEvent('api-response', {
+  bubbles: true,
+  detail: {
+    id: 'abc',
+    request: {
+      url: 'https://domain.com/'
+      method: 'GET',
+      headers: 'accept: text/plain'
+    },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      payload: 'Hello world',
+      headers: 'content-type: text/plain'
+    },
+    loadingTime: 124.12345678,
+    isError: false,
+    // everything below is optional
+    isXhr: false,
+    sentHttpMessage: 'GET / HTTP/1.1\nHost: domain.com\naccept: text/plain\n\n\n'
+    redirects: [{
+      status: 301,
+      statusText: 'Not here',
+      payload: 'Go to https://other.domain.com',
+      headers: 'content-type: text/plain\nlocation: https://other.domain.com\ncontent-length: 30'
+    }],
+    timing: {
+      blocked: 12.0547856,
+      dns: 0.12,
+      connect: 112.21458762,
+      send: 4.4748989,
+      wait: 15.8436988,
+      receive: 65.125412256,
+      ssl: 10
+    },
+    redirectsTiming: [{
+      blocked: 12.0547856,
+      dns: 0.12,
+      connect: 112.21458762,
+      send: 4.4748989,
+      wait: 15.8436988,
+      receive: 65.125412256,
+      ssl: 10
+    }]
+  }
+});
+document.dispatchEvent(e);
+```
+
 ## abort-api-request
 
 Dispatched by `api-request-editor` when the user decided to cancel the request.
