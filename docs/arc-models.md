@@ -17,8 +17,8 @@ The request object produced by the `request-editor` or `api-request-editor`
   "payload": "String|File|Blob|ArrayBuffer, optional, data to send",
   "queryModel": "Array, optional, List of query parameters model objects",
   "pathModel": "Array, optional, List of URI parameters model objects. This property is only available for `api-request-editor`"
-  "projects": "Array<String>. Contains a list of project associated with this request. This property is only used in Advanced REST client application."
-  "name": "Request name if request.type is saved. This property is used in ARC project"
+  "projects": "Array<String>. Contains a list of project associated with this request. This property is only used in Advanced REST client application.",
+  "name": "Request name if request.type is saved. This property is used in ARC project",
   "type": "Can be either saved or history. This property is used in ARC project",
   "description": "Request name if request.type is saved. This property is used in ARC project",
   "created": "Number, timestamp when the request was created",
@@ -60,5 +60,21 @@ An object representing requests workspace. Keeps information about current state
   "environment": "String, the name of last used environment",
   "requests": "Array, List of `ArcRequest` objects"
 }
+```
+
+## ArcMultipartItem
+
+An object representing serialized part of the multipart payload. It is used when processing cURL command, storing multipart request or restoring multipar request.
+
+```json
+ {
+  "name": "String, Part field name",
+  "value": "String, A value of the part",
+  "type": "String, Optional, Mime type of the part. This type should be applied when restoring a blob value",
+  "isLocalFile": "String, For cURL processor; The value represents a path to a file that should be read in order to populate the value",
+  "isFile": "String, When true it means that original part represented a file. Payload processor use this to determine what to restore: string value or a blob",
+  "readFileAsText": "String, Used when processing cURL command, file should be read as text to populate the value",
+  "isTextBlob": "String, Tells the processor that in the UI user added a text part with content type (which eventually is a blob)",
+ }
 ```
 
