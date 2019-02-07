@@ -32,6 +32,8 @@ The declaration above would export all requests and a single variable.
 
 **options.skipImport** `Boolean`, optional - Adds flag to the export file to skip import table and storing the data to the data store when opening the file.
 
+**options.kind** `String`, optional - Sets the `kind` property of export object.
+
 **providerOptions** `Object`, optional. A list of options to be passed to export provider (currently File and Google Drive).
 Schema depends on the provider (`options.provider`)
 
