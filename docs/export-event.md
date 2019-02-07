@@ -1,32 +1,82 @@
 # Exporting data
 
-Each ARC application should include `arc-data-export` component. The element processes data to export and redirects the even to appropriate component (dependeds on the `destination` value).
+Each ARC application should include `arc-data-export` component. The element processes data to export and redirects the even to appropriate component (dependeds on the `destination` value). This event creates ARC export object.
 
-The export system is based on `export-data` custom event.
+## `arc-data-export` event
+
+This event is to export ARC related data from the datastore to external location.
+
+The detail object contains:
+
+**data** `Object`, required. Data to export.
+
+Each key is the model name (eg saved, history, websocket, url-history, variables, auth, cookies, host-rules).
+The value is either boolean `true` to indicate that the data should be read from the data store or an array with items to export. Both can be combined.
+```javascript
+const e = new CustomEvent('arc-data-export', {
+  detail: {
+    data: {
+      requests: true,
+      variables: [{variable: 'environment', value: 'qax', enabled: true}]
+    }
+  }
+});
+```
+The declaration above would export all requests and a single variable.
+
+**options** - Export options.
+
+**options.provider** `String`, required - Name of the export provider. ARC supports `drive` and `file` providers at the moment.
+
+**options.file** `String`, required - Export file name. Without a path. This will be defined by the user in save file dialog.
+
+**options.skipImport** `Boolean`, optional - Adds flag to the export file to skip import table and storing the data to the data store when opening the file.
+
+**providerOptions** `Object`, optional. A list of options to be passed to export provider (currently File and Google Drive).
+Schema depends on the provider (`options.provider`)
+
+### Example
+
+```javascript
+const e = new CustomEvent('arc-data-export', {
+  bubbles: true,
+  cancelable: true,
+  detail: {
+    options: {
+      file: 'my-export.json',
+      provider: 'drive',
+      skipImport: false
+    },
+    providerOptions: {
+      parents: [{name: 'New folder'}, {name: 'Existing folder', id: 'google-drive-id'}]
+    },
+    data: {
+      requests: true,
+      variables: [{variable: 'environment', value: 'qax', enabled: true}]
+    }
+  }
+});
+document.body.dispatchEvent(e);
+```
+
 
 ## `export-data` event
 
-The event is handled by `arc-data-export` component. It transforms the data if required and dispatches an event depending on value of the `destination` property.
-Each ARC application should include elements that handle destination events based on the platform.
+An event to export any data. It won't change incomming data (won't create export object) and will store data as they are.
 
 ### Event properties
 
 The `details` object of the `export-data` event should have the following properties:
 
-**file** `String` - Name of the file to create. Note that it may only be a suggestion for the user in save dialog box.
+**data** `Array|Object|String`, required. Data to export.
 
-**destination** `String` A place where to save the data. Currently ARC supports `file` and `drive` where `drive` is Google Drive export.
+**file** `String`, required. Name of the file to create. Note that it may only be a suggestion for the user in save dialog box.
+
+**destination** `String`, required. A place where to save the data. Currently ARC supports `file` and `drive` where `drive` is Google Drive export.
 Note, `file` in web environment (ARC web app) is the name of the file that will be downloaded. Electron / Chrome application uses this only as a suggestion for the user.
 
-**data** `Array|Object|String` Data to export.
-
-**type** `String` - The data type to export. Most of the data are transparently passed to the export function where it is stringified by JSON object. There are however special types handled by `arc-export` component that transform data to an appropiate structure. This are ARC database export files that has set structure.
-
-`type` can have the following values:
--   `default` or when missing - Pass the data to target component
--   `project` - Expects `project` and `requests` properties on `data` property. Exports saved project data
--   `request` - Expects `data` to be an array of requests to export.
--   `arc-export` - An event dispatched by settings panel to export selected by used data. It creates ARC full export object with the data found in the `data` object. The valiue of each property on the `data` object can be either a boolean indicating to dump current database or an array of objects to export (without getting the data from the datastore)
+**providerOptions** `Object`, optional. A list of options to be passed to export provider (currently File and Google Drive).
+Schema depends on the provider (`destination`)
 
 
 ### Example
@@ -39,12 +89,7 @@ const e = new CustomEvent('export-data', {
   detail: {
     file: 'arc-data-export.json',
     destination: 'file',
-    type: 'arc-export',
-    data: {
-      requests: true,
-      projects: true,
-      'history-url': [{...}]
-    }
+    data: {...}
   }
 });
 this.dispatchEvent(e);
